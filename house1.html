@@ -560,7 +560,7 @@ async function loadBusyDates() {
     }
 
     const text = await res.text();
-
+    console.log(text);
     const busy = [];
 
     const events = text.split("BEGIN:VEVENT");
