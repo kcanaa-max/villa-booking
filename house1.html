@@ -545,25 +545,17 @@ day.appendChild(priceDiv);
     });
   }
 
-  async function loadBusyDates() {
-    const now = new Date();
-    const timeMin = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const timeMax = new Date(now.getFullYear(), now.getMonth() + 12, 1).toISOString();
+async function loadBusyDates() {
 
-    const url =
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
-      `?key=${API_KEY}` +
-      `&singleEvents=true` +
-      `&orderBy=startTime` +
-      `&timeMin=${encodeURIComponent(timeMin)}` +
-      `&timeMax=${encodeURIComponent(timeMax)}`;
+    const res = await fetch(
+        "https://sutochno.ru/calendar/ical/013fee37b04492c84e84291bd2dc8b5d0642a3a.ics"
+    );
 
-    const res = await fetch(url);
-    const data = await res.json();
+    const text = await res.text();
 
-    if (!res.ok) {
-      throw new Error(data?.error?.message || "Ошибка загрузки календаря");
-    }
+    console.log(text);
+
+}
 
     const busy = [];
 
