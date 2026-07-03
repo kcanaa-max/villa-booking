@@ -555,11 +555,50 @@ async function loadBusyDates() {
         "https://www.avito.ru/calendars-export/77/70/7771462570.ics"
     );
 
+    if (!res.ok) {
+        throw new Error("Не удалось загрузить календарь");
+    }
+
     const text = await res.text();
 
-    console.log(text);
+    const busy = [];
+
+    const events = text.split("BEGIN:VEVENT");
+
+    events.forEach(event => {
+
+        const startMatch = event.match(/DTSTART.*:(\d{8})/);
+        const endMatch = event.match(/DTEND.*:(\d{8})/);
+
+        if (!startMatch || !endMatch) return;
+
+        const start =
+            startMatch[1].slice(0,4) + "-" +
+            startMatch[1].slice(4,6) + "-" +
+            startMatch[1].slice(6,8);
+
+        const endDate = new Date(
+            endMatch[1].slice(0,4),
+            endMatch[1].slice(4,6) - 1,
+            endMatch[1].slice(6,8)
+        );
+
+        // DTEND = день выезда, поэтому убираем один день
+        endDate.setDate(endDate.getDate() - 1);
+
+        const end =
+            endDate.getFullYear() + "-" +
+            String(endDate.getMonth() + 1).padStart(2, "0") + "-" +
+            String(endDate.getDate()).padStart(2, "0");
+
+        busy.push(...expandDates(start, end));
+
+    });
+
+    return [...new Set(busy)];
 
 }
+
 
   
   flatpickr.l10ns.ru.firstDayOfWeek = 1;
