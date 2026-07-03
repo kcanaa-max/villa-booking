@@ -561,29 +561,6 @@ async function loadBusyDates() {
 
 }
 
-    const busy = [];
-
-    (data.items || []).forEach(event => {
-      if (event.start?.date && event.end?.date) {
-        busy.push(...expandDates(event.start.date, event.end.date));
-      } else if (event.start?.dateTime && event.end?.dateTime) {
-        const startDate = event.start.dateTime.slice(0, 10);
-        const endDate = event.end.dateTime.slice(0, 10);
-
-        const start = parseLocalDate(startDate);
-        const end = parseLocalDate(endDate);
-
-        if (toYMD(start) === toYMD(end)) {
-          busy.push(toYMD(start));
-        } else {
-          end.setDate(end.getDate() + 1);
-          busy.push(...expandDates(startDate, toYMD(end)));
-        }
-      }
-    });
-
-    return [...new Set(busy)];
-  }
   
   flatpickr.l10ns.ru.firstDayOfWeek = 1;
   initCalendar([]);
