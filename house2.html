@@ -634,6 +634,7 @@ async function loadBusyDates() {
 
   loadBusyDates()
     .then((busyDates) => {
+      console.log("ЗАКРЫТЫЕ ДАТЫ HOUSE2:", busyDates);
       initCalendar(busyDates);
       selectedDatesEl.innerText = "Выбери даты";
       warningEl.innerText = busyDates.length ? "" : "Занятые даты не найдены";
