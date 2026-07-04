@@ -611,7 +611,7 @@ async function loadBusyDates() {
         );
 
         // DTEND = день выезда, поэтому убираем один день
-        endDate.setDate(endDate.getDate() - 1);
+        // DTEND is exclusive - no adjustment needed
 
         const end =
             endDate.getFullYear() + "-" +
