@@ -251,18 +251,26 @@
       <input type="checkbox" id="banya">
       <span>Баня +6 000 ₽</span>
     </label>
+    <br><br>
+    <label class="booking-option">
+      <input type="checkbox" id="kupel">
+      <span>Чан +4 000 ₽</span>
+    </label>
   </div>
 
   <div class="booking-card">
     <div style="font-size:16px; margin-bottom:10px;">Количество гостей</div>
     <select id="guests" class="booking-input" style="margin-top:0;">
+      <option value="1">1 гость</option>
       <option value="2">2 гостя</option>
       <option value="3">3 гостя</option>
-      <option value="4">4 гостя</option>
+      <option value="4" selected>4 гостя</option>
+      <option value="5">5 гостей</option>
+      <option value="6">6 гостей</option>
     </select>
     <div class="booking-info">
-      Базовая цена указана за 2 гостей.  
-      Доплата за 3-го и 4-го гостя — 1 500 ₽ в сутки за человека.
+      Базовая цена указана за 4 гостей.  
+      Доплата начиная с 5-го гостя — 2 000 ₽ в сутки за человека.
     </div>
   </div>
 
@@ -288,13 +296,14 @@ window.addEventListener("load", function () {
     tg.ready();
     tg.expand();
   }
-
-  const TELEGRAM_USERNAME = "ksyunmsk";
+  const TELEGRAM_USERNAME = "lena_k861";
 
   const minNights = 2;
-  const pricePerNight = 15000;
-  const extraGuestPrice = 1500;
+  const weekdayPrice = 15000;
+  const weekendPrice = 17000;
+  const extraGuestPrice = 2000;
   const banyaPrice = 6000;
+  const kupelPrice = 4000;
   const discounts = [
   { nights: 3, percent: 5 },
   { nights: 5, percent: 10 },
@@ -321,8 +330,23 @@ window.addEventListener("load", function () {
 }
   function getNightPrice(date) {
   const key = toYMD(date);
-  return specialPrices[key]?.price || pricePerNight;
+
+  // Сначала проверяем специальную цену на конкретную дату
+  if (specialPrices[key]) {
+    return specialPrices[key].price;
+  }
+
+  const day = date.getDay();
+
+  // Пятница и суббота — цена выходного дня
+  if (day === 5 || day === 6) {
+    return weekendPrice;
+  }
+
+  // Остальные дни — цена буднего дня
+  return weekdayPrice;
 }
+
   function getPriceDetails() {
   if (!checkin || !checkout) return "";
 
@@ -350,6 +374,7 @@ window.addEventListener("load", function () {
   const priceEl = document.getElementById("price");
   const priceDetailsEl = document.getElementById("priceDetails");
   const banyaEl = document.getElementById("banya");
+  const kupelEl = document.getElementById("kupel");
   const guestsEl = document.getElementById("guests");
   const bookBtn = document.getElementById("bookBtn");
   const nameEl = document.getElementById("name");
@@ -393,7 +418,7 @@ window.addEventListener("load", function () {
 
   function getTotal() {
   const guests = Number(guestsEl.value || 2);
-  const extraGuests = Math.max(0, guests - 2);
+  const extraGuests = Math.max(0, guests - 4);
 
   let total = 0;
 
@@ -421,6 +446,7 @@ window.addEventListener("load", function () {
 
   // баня
   if (banyaEl.checked) total += banyaPrice;
+  if (kupelEl.checked) total += kupelPrice;
 
   return Math.round(total);
 }
@@ -558,7 +584,7 @@ async function loadBusyDates() {
     }
 
     const text = await res.text();
-
+    console.log(text);
     const busy = [];
 
     const events = text.split("BEGIN:VEVENT");
@@ -593,6 +619,7 @@ async function loadBusyDates() {
 
     });
 
+  console.log(busy);
     return [...new Set(busy)];
 
 }
@@ -615,6 +642,7 @@ async function loadBusyDates() {
     });
 
   banyaEl.addEventListener("change", updateBookingState);
+  kupelEl.addEventListener("change", updateBookingState);
   guestsEl.addEventListener("change", updateBookingState);
 
   bookBtn.addEventListener("click", function () {
@@ -648,7 +676,7 @@ async function loadBusyDates() {
 Выезд: ${formatDate(checkout)}
 Ночей: ${selectedNights}
 Гостей: ${guests}
-${banyaEl.checked ? "Баня: да (+6 000 ₽)\n" : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
+${banyaEl.checked ? "Баня: да (+6 000 ₽)\n" : ""}${kupelEl.checked ? "Чан: да (+4 000 ₽)\n" : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
 
 Имя: ${name}
 Комментарий: ${comment}`;
@@ -658,3 +686,4 @@ ${banyaEl.checked ? "Баня: да (+6 000 ₽)\n" : ""}Стоимость: ${t
   };
 });
 </script>
+
