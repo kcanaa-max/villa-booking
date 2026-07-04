@@ -234,12 +234,11 @@
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
-  .hidden-extra {
-    display: none;
-}
+  .back-button{background:none;border:none;padding:0;margin:0 0 16px;font-size:17px;font-weight:500;color:#222;cursor:pointer;}
 </style>
 
 <div class="booking-app">
+  <button class="back-button" onclick="window.location.href='index.html'">← Назад</button>
   <h1>Бронирование дома 🌲</h1>
 
   <div class="booking-card">
@@ -254,8 +253,7 @@
       <input type="checkbox" id="banya">
       <span>Баня +6 000 ₽</span>
     </label>
-    <br><br>
-    <label class="booking-option">
+    <label class="booking-option" style="margin-top:10px;">
       <input type="checkbox" id="kupel">
       <span>Купель +4 000 ₽</span>
     </label>
@@ -268,12 +266,9 @@
       <option value="2">2 гостя</option>
       <option value="3">3 гостя</option>
       <option value="4" selected>4 гостя</option>
-      <option value="5">5 гостей</option>
-      <option value="6">6 гостей</option>
     </select>
     <div class="booking-info">
-      Базовая цена указана за 4 гостей.  
-      Доплата начиная с 5-го гостя — 1 500 ₽ в сутки за человека.
+      Цена указана за 4 гостей.
     </div>
   </div>
 
@@ -404,8 +399,8 @@ window.addEventListener("load", function () {
   }
 
   function getTotal() {
-  const guests = Number(guestsEl.value || 2);
-  const extraGuests = Math.max(0, guests - 4);
+  //const guests = Number(guestsEl.value || 2);
+  //const extraGuests = Math.max(0, guests - 4);
 
   let total = 0;
 
@@ -420,7 +415,7 @@ window.addEventListener("load", function () {
     total += getNightPrice(current);
 
     // доплата за гостей
-    total += extraGuests * extraGuestPrice;
+    //total += extraGuests * extraGuestPrice;
 
     current.setDate(current.getDate() + 1);
   }
