@@ -234,9 +234,11 @@
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
+.back-button{background:none;border:none;padding:0;margin:0 0 16px;font-size:17px;font-weight:500;color:#222;cursor:pointer;}
 </style>
 
 <div class="booking-app">
+<button class="back-button" onclick="window.location.href='index.html'">← Назад</button>
   <h1>Бронирование дома 🌲</h1>
 
   <div class="booking-card">
@@ -251,8 +253,7 @@
       <input type="checkbox" id="banya">
       <span>Баня +6 000 ₽</span>
     </label>
-    <br><br>
-    <label class="booking-option">
+    <label class="booking-option" style="margin-top:10px;">
       <input type="checkbox" id="kupel">
       <span>Чан +4 000 ₽</span>
     </label>
