@@ -249,7 +249,7 @@
   <div class="booking-card">
     <label class="booking-option">
       <input type="checkbox" id="banya">
-      <span>Баня +8 000 ₽</span>
+      <span>Баня +6 000 ₽</span>
     </label>
     <br><br>
     <label class="booking-option">
@@ -296,12 +296,12 @@ window.addEventListener("load", function () {
     tg.ready();
     tg.expand();
   }
-  const TELEGRAM_USERNAME = "ksyunmsk";
+  const TELEGRAM_USERNAME = "lena_k861";
 
   const minNights = 2;
-  const pricePerNight = 19000;
+  const pricePerNight = 5000;
   const extraGuestPrice = 1500;
-  const banyaPrice = 8000;
+  const banyaPrice = 6000;
   const kupelPrice = 4000;
   const discounts = [
   { nights: 3, percent: 5 },
@@ -660,7 +660,7 @@ async function loadBusyDates() {
 Выезд: ${formatDate(checkout)}
 Ночей: ${selectedNights}
 Гостей: ${guests}
-${banyaEl.checked ? "Баня: да (+8 000 ₽)\n" : ""}${kupelEl.checked ? "Купель: да (+4 000 ₽)\n" : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
+${banyaEl.checked ? "Баня: да (+6 000 ₽)\n" : ""}${kupelEl.checked ? "Купель: да (+4 000 ₽)\n" : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
 
 Имя: ${name}
 Комментарий: ${comment}`;
