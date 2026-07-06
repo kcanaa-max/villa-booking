@@ -596,7 +596,6 @@ async function loadBusyDates() {
         if (toYMD(start) === toYMD(end)) {
           busy.push(toYMD(start));
         } else {
-          end.setDate(end.getDate() + 1);
           busy.push(...expandDates(startDate, toYMD(end)));
         }
       }
