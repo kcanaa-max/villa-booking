@@ -585,7 +585,9 @@ async function loadBusyDates() {
 
     (data.items || []).forEach(event => {
       if (event.start?.date && event.end?.date) {
-        busy.push(...expandDates(event.start.date, event.end.date));
+        const end = parseLocalDate(event.end.date);
+end.setDate(end.getDate() - 1);
+busy.push(...expandDates(event.start.date, toYMD(end)));
       } else if (event.start?.dateTime && event.end?.dateTime) {
         const startDate = event.start.dateTime.slice(0, 10);
         const endDate = event.end.dateTime.slice(0, 10);
