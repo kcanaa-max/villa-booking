@@ -603,6 +603,8 @@ busy.push(...expandDates(event.start.date, toYMD(end)));
       }
     });
 
+  console.log("GOOGLE EVENTS:", data.items);
+console.log("BUSY DATES:", busy);
     return [...new Set(busy)];
   }
 
