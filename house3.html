@@ -303,7 +303,7 @@ window.addEventListener("load", function () {
   const CALENDAR_ID = "5j2ubnreofalt662ih6lltk26hc721vg@import.calendar.google.com";
   const API_KEY = "AIzaSyAYMSnK3P0ljVrGMNCnqpmDEn6qSRw6B1M";
 
-  const minNights = 2;
+  const minNights = 1;
   const weekdayPrice = 25000;
   const weekendPrice = 35000;
   const extraGuestPrice = 2000;
@@ -474,7 +474,7 @@ window.addEventListener("load", function () {
 
     if (selectedNights < minNights) {
       resetPrice();
-      warningEl.innerText = "Минимальный срок бронирования — 2 ночи.";
+      warningEl.innerText = "Минимальный срок бронирования — 1 ночи.";
       bookBtn.disabled = true;
       return;
     }
@@ -656,7 +656,7 @@ loadBusyDates()
     }
 
     if (selectedNights < minNights) {
-      warningEl.innerText = "Минимальный срок бронирования — 2 ночи.";
+      warningEl.innerText = "Минимальный срок бронирования — 1 ночи.";
       return;
     }
 
