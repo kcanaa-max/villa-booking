@@ -356,25 +356,100 @@ window.addEventListener("load", function () {
   const CALENDAR_ID = "5j2ubnreofalt662ih6lltk26hc721vg@import.calendar.google.com";
   const API_KEY = "AIzaSyAYMSnK3P0ljVrGMNCnqpmDEn6qSRw6B1M";
 
+  const PRICES_URL = "https://storage.yandexcloud.net/villa-booking-prices/prices.json";
+  const HOUSE_CODE = "house3";
+
   const minNights = 1;
-  const weekdayPrice = 25000;
-  const weekendPrice = 35000;
-  const extraGuestPrice = 2000;
-  const banyaPrice = 6000;
-  const kupelPrice = 6000;
+
+  // Резервные цены на случай, если prices.json временно недоступен.
+  let weekdayPrice = 25000;
+  let weekendPrice = 35000;
+  let extraGuestPrice = 2000;
+  let banyaPrice = 6000;
+  let kupelPrice = 6000;
+
   const discounts = [
-  { nights: 3, percent: 5 },
-  { nights: 5, percent: 10 },
-  { nights: 6, percent: 15 }
-];
-  const specialPrices = {
-  "2026-12-31": { price: 60000, label: "Новогодний тариф 🎄" },
-  "2027-01-01": { price: 60000, label: "Новогодний тариф 🎄" },
-  "2027-03-08": { price: 19000, label: "Праздничный тариф 🌸" },
-  "2027-02-14": { price: 19000, label: "праздничный тариф 🌸" },
-  "2027-02-23": { price: 19000, label: "праздничный тариф 🌸" },
-  "2026-06-13": { price: 18000 }
-};
+    { nights: 3, percent: 5 },
+    { nights: 5, percent: 10 },
+    { nights: 6, percent: 15 }
+  ];
+
+  // Резервные специальные даты из старого файла.
+  let specialPeriods = [
+    { house_name: HOUSE_CODE, date_from: "2026-12-31", date_to: "2026-12-31", price_weekday: 60000, price_weekend: 60000, label: "Новогодний тариф 🎄" },
+    { house_name: HOUSE_CODE, date_from: "2027-01-01", date_to: "2027-01-01", price_weekday: 60000, price_weekend: 60000, label: "Новогодний тариф 🎄" },
+    { house_name: HOUSE_CODE, date_from: "2027-03-08", date_to: "2027-03-08", price_weekday: 19000, price_weekend: 19000, label: "Праздничный тариф 🌸" },
+    { house_name: HOUSE_CODE, date_from: "2027-02-14", date_to: "2027-02-14", price_weekday: 19000, price_weekend: 19000, label: "Праздничный тариф 🌸" },
+    { house_name: HOUSE_CODE, date_from: "2027-02-23", date_to: "2027-02-23", price_weekday: 19000, price_weekend: 19000, label: "Праздничный тариф 🌸" },
+    { house_name: HOUSE_CODE, date_from: "2026-06-13", date_to: "2026-06-13", price_weekday: 18000, price_weekend: 18000, label: null }
+  ];
+
+  // Для house3 пятница и суббота считаются выходными.
+  function isWeekend(date) {
+    const day = date.getDay();
+    return day === 5 || day === 6;
+  }
+
+  function findSpecialPeriod(date) {
+    const key = toYMD(date);
+    return specialPeriods.find(period =>
+      period.house_name === HOUSE_CODE &&
+      key >= period.date_from &&
+      key <= period.date_to
+    ) || null;
+  }
+
+  async function loadRemotePrices() {
+    try {
+      const res = await fetch(PRICES_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("Ошибка загрузки prices.json");
+
+      const data = await res.json();
+      const house = data?.houses?.[HOUSE_CODE];
+
+      if (house) {
+        weekdayPrice = Number(house.price_weekday ?? weekdayPrice);
+        weekendPrice = Number(house.price_weekend ?? weekendPrice);
+        extraGuestPrice = Number(house.extra_guest_price ?? extraGuestPrice);
+        banyaPrice = Number(house.banya_price ?? banyaPrice);
+        kupelPrice = Number(house.kupel_price ?? kupelPrice);
+      }
+
+      if (Array.isArray(data?.special_prices)) {
+        specialPeriods = data.special_prices.filter(
+          period => period.house_name === HOUSE_CODE
+        );
+      }
+
+      const banyaText = document.getElementById("banya")?.nextElementSibling;
+      const kupelText = document.getElementById("kupel")?.nextElementSibling;
+
+      if (banyaText) {
+        banyaText.textContent = banyaPrice > 0
+          ? `Баня +${banyaPrice.toLocaleString("ru-RU")} ₽`
+          : "Баня — входит в стоимость";
+      }
+
+      if (kupelText) {
+        kupelText.textContent = kupelPrice > 0
+          ? `Джакузи +${kupelPrice.toLocaleString("ru-RU")} ₽`
+          : "Джакузи — входит в стоимость";
+      }
+
+      const guestInfo = document.querySelector(".guests-select-wrap + .booking-info");
+      if (guestInfo) {
+        guestInfo.textContent =
+          `Базовая цена указана за 4 гостей. Доплата начиная с 5-го гостя — ` +
+          `${extraGuestPrice.toLocaleString("ru-RU")} ₽ в сутки за человека.`;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn("Используются резервные цены из house3.html", error);
+      return false;
+    }
+  }
+
   function getDiscountPercent(nights) {
   let percent = 0;
 
@@ -387,23 +462,16 @@ window.addEventListener("load", function () {
   return percent;
 }
   function getNightPrice(date) {
-  const key = toYMD(date);
+    const period = findSpecialPeriod(date);
 
-  // Сначала проверяем специальную цену на конкретную дату
-  if (specialPrices[key]) {
-    return specialPrices[key].price;
+    if (period) {
+      return isWeekend(date)
+        ? Number(period.price_weekend ?? period.price_weekday ?? weekendPrice)
+        : Number(period.price_weekday ?? period.price_weekend ?? weekdayPrice);
+    }
+
+    return isWeekend(date) ? weekendPrice : weekdayPrice;
   }
-
-  const day = date.getDay();
-
-  // Пятница и суббота — цена выходного дня
-  if (day === 5 || day === 6) {
-    return weekendPrice;
-  }
-
-  // Остальные дни — цена буднего дня
-  return weekdayPrice;
-}
 
   function getPriceDetails() {
   if (!checkin || !checkout) return "";
@@ -417,10 +485,10 @@ window.addEventListener("load", function () {
   );
 
   while (current < checkout) {
-    const key = toYMD(current);
-   if (specialPrices[key] && specialPrices[key].label) {
-  details.push(`${formatDate(current)} — ${specialPrices[key].label}`);
-}
+    const period = findSpecialPeriod(current);
+    if (period?.label) {
+      details.push(`${formatDate(current)} — ${period.label}`);
+    }
     current.setDate(current.getDate() + 1);
   }
 
@@ -678,19 +746,23 @@ console.log("BUSY DATES:", busy);
 
 flatpickr.l10ns.ru.firstDayOfWeek = 1;
 
-selectedDatesEl.innerText = "Загружаем свободные даты…";
+selectedDatesEl.innerText = "Загружаем цены и свободные даты…";
 
-loadBusyDates()
-    .then((busyDates) => {
-      initCalendar(busyDates);
-      selectedDatesEl.innerText = "Выбери даты";
-      warningEl.innerText = busyDates.length ? "" : "Занятые даты не найдены";
-    })
-    .catch((e) => {
-      console.error(e);
-      selectedDatesEl.innerText = "Выбери даты";
-      warningEl.innerText = "Не удалось загрузить занятые даты";
-    });
+Promise.all([
+  loadRemotePrices(),
+  loadBusyDates()
+])
+  .then(([, busyDates]) => {
+    initCalendar(busyDates);
+    selectedDatesEl.innerText = "Выбери даты";
+    warningEl.innerText = busyDates.length ? "" : "Занятые даты не найдены";
+  })
+  .catch((e) => {
+    console.error(e);
+    initCalendar([]);
+    selectedDatesEl.innerText = "Выбери даты";
+    warningEl.innerText = "Не удалось загрузить занятые даты";
+  });
 
   banyaEl.addEventListener("change", updateBookingState);
   kupelEl.addEventListener("change", updateBookingState);
@@ -727,7 +799,7 @@ loadBusyDates()
 Выезд: ${formatDate(checkout)}
 Ночей: ${selectedNights}
 Гостей: ${guests}
-${banyaEl.checked ? "Баня: да (+6 000 ₽)\n" : ""}${kupelEl.checked ? "Джакузи: да (+6 000 ₽)\n" : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
+${banyaEl.checked ? (banyaPrice > 0 ? `Баня: да (+${banyaPrice.toLocaleString("ru-RU")} ₽)\n` : "Баня: входит в стоимость\n") : ""}${kupelEl.checked ? (kupelPrice > 0 ? `Джакузи: да (+${kupelPrice.toLocaleString("ru-RU")} ₽)\n` : "Джакузи: входит в стоимость\n") : ""}Стоимость: ${total.toLocaleString("ru-RU")} ₽
 
 Имя: ${name}
 Комментарий: ${comment}`;
